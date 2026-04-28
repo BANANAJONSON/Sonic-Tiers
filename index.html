@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Sonic Tiers</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -336,6 +337,67 @@ body {
   padding:4px 12px; border-radius:8px; font-size:13px; font-weight:bold;
 }
 .no-tier { color:#555; font-size:13px; font-style:italic; }
+
+/* ── MOBILE RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  #welcome h1 { font-size: 28px; padding: 0 20px; text-align: center; }
+
+  .header {
+    padding: 12px 14px;
+    border-radius: 0 0 14px 14px;
+    gap: 10px;
+  }
+  .left-header { gap: 8px; width: 100%; }
+  .logo-text { font-size: 17px; }
+  .search-box { flex: 1; }
+  .search-box input { width: 100%; font-size: 14px; padding: 8px 10px; }
+  .nav-btn { font-size: 13px; padding: 7px 11px; }
+
+  .gamemode-bar { padding: 10px 12px 6px; gap: 6px; }
+  .gm-tab { padding: 6px 11px; font-size: 12px; }
+
+  .section-title { margin: 0 12px 6px; font-size: 10px; }
+  .container { padding: 10px 12px; }
+
+  .player {
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    flex-direction: row;
+    align-items: center;
+  }
+  .player-left { gap: 10px; flex: 1; min-width: 0; }
+  .rank-number { font-size: 22px; min-width: 26px; }
+  .player-avatar { width: 46px; height: 46px; border-radius: 9px; }
+  .player-name { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .points-badge { font-size: 11px; padding: 3px 7px; }
+
+  .player-tiers {
+    max-width: 100%;
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+  /* Make player card column on very small screens */
+  .player { flex-wrap: wrap; }
+
+  .tier { font-size: 11px; padding: 4px 8px; border-radius: 7px; }
+
+  .popup-content { padding: 20px 16px; border-radius: 16px; }
+  .popup-avatar { width: 70px; }
+  .popup-name { font-size: 19px; }
+  .popup-gm-label { font-size: 12px; min-width: 90px; }
+  .popup-tier-badge { font-size: 12px; padding: 3px 9px; }
+}
+
+@media (max-width: 380px) {
+  #welcome h1 { font-size: 22px; }
+  .logo-text { font-size: 14px; }
+  .gm-tab { font-size: 11px; padding: 5px 9px; }
+  .player-name { font-size: 13px; }
+  .rank-number { font-size: 19px; }
+  .player-avatar { width: 40px; height: 40px; }
+}
 </style>
 </head>
 <body>
@@ -536,7 +598,7 @@ const PLAYERS = [
     tiers: { overall: "LT3", sword: "HT3", axe: null, uhc: null, nethpot: null, crystal: null, mace: null, opmace: "LT2", cart: null }
   },
   {
-    name: "selimdark", skin: "selim.png", pts: 32, rankClass: "rank6",
+    name: "selimdark", skin: "selimdark.png", pts: 32, rankClass: "rank6",
     tiers: { overall: "LT3", sword: "HT4", axe: "HT4", uhc: "LT4", nethpot: "HT5", crystal: null, mace: "LT3", opmace: null, cart: null }
   },
 ];
