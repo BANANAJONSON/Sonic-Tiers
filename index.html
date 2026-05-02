@@ -2,132 +2,739 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sonic Tiers - Maintenance</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sonic Tiers</title>
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
   background: linear-gradient(to bottom, #0a0f2c, #000);
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+#particles-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1;
+}
+#welcome {
+  position: fixed; width: 100%; height: 100%;
+  background: black;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+  animation: fadeOut 0.7s ease 2s forwards;
+  pointer-events: none;
+}
+#welcome h1 {
+  font-size: 48px;
+  background: linear-gradient(90deg, #00c3ff, #7a5cff, #2d2dff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: zoomText 1.5s ease;
+}
+@keyframes zoomText { 0%{transform:scale(0.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+@keyframes fadeOut { to{opacity:0;visibility:hidden} }
+.main { opacity:0; animation: fadeInPage 1.2s ease 2.2s forwards; position: relative; z-index: 2; }
+@keyframes fadeInPage { 
+  0%{opacity:0; transform: translateY(30px);}
+  100%{opacity:1; transform: translateY(0);}
 }
 
-/* Container */
-.container {
-  text-align: center;
-  animation: fadeIn 2s ease;
+/* GLOWING TOP 3 RANKS — GPU-friendly: only opacity animates, no box-shadow repaints */
+.rank1-glow {
+  background: linear-gradient(135deg, #b8860b, #ffd700, #ff8c00) !important;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255,255,255,0.2);
+  will-change: opacity;
+  animation: rankGlowPulse 3s ease-in-out infinite alternate;
+}
+.rank2-glow {
+  background: linear-gradient(135deg, #c0c0c0, #e0e0e0, #f5f5f5) !important;
+  box-shadow: 0 0 30px rgba(192,192,192,0.5), 0 0 60px rgba(192,192,192,0.2), inset 0 0 15px rgba(255,255,255,0.3);
+  will-change: opacity;
+  animation: rankGlowPulse 3.5s ease-in-out infinite alternate;
+}
+.rank3-glow {
+  background: linear-gradient(135deg, #cd7f32, #d4af37, #ffbf00) !important;
+  box-shadow: 0 0 30px rgba(255,191,0,0.5), 0 0 60px rgba(255,191,0,0.2), inset 0 0 15px rgba(255,255,255,0.2);
+  will-change: opacity;
+  animation: rankGlowPulse 3.2s ease-in-out infinite alternate;
+}
+@keyframes rankGlowPulse {
+  0%   { opacity: 0.92; }
+  100% { opacity: 1; }
 }
 
-/* Sonic-style glowing title */
-h1 {
-  font-size: 60px;
-  color: #00c3ff;
-  text-shadow: 0 0 10px #00c3ff, 0 0 30px #0077ff;
-  margin-bottom: 10px;
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 25px;
+  background: linear-gradient(90deg, #2d2dff, #7a5cff, #00c3ff);
+  border-radius: 0 0 20px 20px;
+  gap: 12px; flex-wrap: wrap;
+  opacity: 0; transform: translateY(-20px);
+  animation: slideDown 0.8s ease 2.5s forwards;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  will-change: transform;
 }
-
-/* Subtitle */
-h2 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #ffffffcc;
+.header:hover {
+  box-shadow: 0 10px 40px rgba(122, 92, 255, 0.4);
+  transform: translateY(-2px);
 }
-
-/* Message */
-p {
-  font-size: 18px;
-  color: #aaa;
-  max-width: 500px;
-  margin: auto;
-}
-
-/* Spinner */
-.loader {
-  margin: 40px auto;
-  border: 6px solid #222;
-  border-top: 6px solid #00c3ff;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite;
-}
-
-/* Footer */
-.footer {
-  position: absolute;
-  bottom: 20px;
-  font-size: 14px;
-  color: #666;
-}
-
-/* Animations */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+@keyframes slideDown {
   to { opacity: 1; transform: translateY(0); }
 }
+.left-header { display:flex; align-items:center; gap:15px; }
+.logo-text {
+  font-size: 22px; font-weight: bold;
+  background: white; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: 2px;
+  opacity: 0; transform: translateX(-30px);
+  animation: slideInLeft 0.6s ease 2.8s forwards;
+}
+@keyframes slideInLeft {
+  to { opacity: 1; transform: translateX(0); }
+}
+.search-box input {
+  padding: 10px 12px; width: 200px; border-radius: 10px;
+  border: none; outline: none;
+  background: linear-gradient(45deg, #111, #333);
+  color: white; transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.search-box input:hover,
+.search-box input:focus { 
+  transform: scale(1.05); 
+  box-shadow: 0 0 20px rgba(0, 195, 255, 0.4);
+}
+.nav-btn {
+  font-size: 15px; padding: 8px 15px; border-radius: 10px;
+  background: linear-gradient(45deg, #555, #999);
+  cursor: pointer; transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease; text-decoration: none; color: white;
+  display: inline-flex; align-items: center; gap: 5px;
+  opacity: 0; transform: translateX(30px);
+  animation: slideInRight 0.6s ease 3.2s forwards;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+@keyframes slideInRight {
+  to { opacity: 1; transform: translateX(0); }
+}
+.nav-btn:hover { 
+  transform: scale(1.1) translateY(-2px); 
+  filter: brightness(1.3); 
+  box-shadow: 0 5px 20px rgba(255,255,255,0.3);
+}
+.gamemode-bar {
+  display: flex; gap: 8px; padding: 16px 20px 8px;
+  flex-wrap: wrap;
+  opacity: 0; transform: translateY(20px);
+  animation: slideUp 0.7s ease 3.5s forwards;
+}
+@keyframes slideUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+.gm-tab {
+  padding: 8px 16px; border-radius: 12px; cursor: pointer;
+  font-size: 13px; font-weight: bold; letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #1a1a3a, #2a2a5a);
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+  user-select: none; display: flex; align-items: center; gap: 6px;
+  opacity: 0; transform: scale(0.8) translateY(10px);
+  position: relative; overflow: hidden;
+}
+.gm-tab::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+.gm-tab:hover::before { left: 100%; }
+.gm-tab:nth-child(1) { animation: tabStagger 0.4s ease 3.6s forwards; }
+.gm-tab:nth-child(2) { animation: tabStagger 0.4s ease 3.65s forwards; }
+.gm-tab:nth-child(3) { animation: tabStagger 0.4s ease 3.7s forwards; }
+.gm-tab:nth-child(4) { animation: tabStagger 0.4s ease 3.75s forwards; }
+.gm-tab:nth-child(5) { animation: tabStagger 0.4s ease 3.8s forwards; }
+.gm-tab:nth-child(6) { animation: tabStagger 0.4s ease 3.85s forwards; }
+.gm-tab:nth-child(7) { animation: tabStagger 0.4s ease 3.9s forwards; }
+.gm-tab:nth-child(8) { animation: tabStagger 0.4s ease 3.95s forwards; }
+.gm-tab:nth-child(9) { animation: tabStagger 0.4s ease 4s forwards; }
+@keyframes tabStagger {
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.gm-tab:hover { 
+  filter: brightness(1.4); 
+  transform: translateY(-3px) scale(1.05); 
+  box-shadow: 0 8px 30px rgba(0,195,255,0.4);
+}
+.gm-tab.active {
+  border-color: #00c3ff;
+  background: linear-gradient(135deg, #00c3ff22, #7a5cff44);
+  box-shadow: 0 0 20px #00c3ff55;
+}
+.container { padding: 16px 20px; }
+.section-title {
+  font-size:11px; text-transform:uppercase; letter-spacing:2px;
+  color:#7a5cff; margin: 0 20px 8px; padding-bottom:4px;
+  border-bottom:1px solid #7a5cff33;
+  opacity: 0; transform: translateY(10px);
+  animation: fadeUpTitle 0.5s ease 4.2s forwards;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+.section-title:hover { 
+  color: #00c3ff; 
+  text-shadow: 0 0 15px #00c3ff;
+  transform: translateY(-2px);
+}
+@keyframes fadeUpTitle {
+  to { opacity: 1; transform: translateY(0); }
+}
+.player {
+  padding: 16px 20px; border-radius: 18px; margin-bottom: 14px;
+  cursor: pointer; opacity: 0; transform: translateY(50px) scale(0.95);
+  animation: playerFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease, filter 0.35s ease;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative; overflow: hidden;
+  will-change: transform;
+}
+.player::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.6s;
+}
+.player:hover::before { left: 100%; }
+.player:nth-child(1) { animation-delay: 4.4s; }
+.player:nth-child(2) { animation-delay: 4.5s; }
+.player:nth-child(3) { animation-delay: 4.6s; }
+.player:nth-child(4) { animation-delay: 4.7s; }
+.player:nth-child(5) { animation-delay: 4.8s; }
+.player:nth-child(6) { animation-delay: 4.9s; }
+@keyframes playerFadeIn { 
+  to{opacity:1;transform:translateY(0) scale(1)} 
+}
+.player:hover { 
+  transform: scale(1.04) translateY(-5px); 
+  filter: brightness(1.15); 
+  box-shadow: 0 15px 50px rgba(255,255,255,0.25);
+}
+.player.rank1.rank1-glow:hover,
+.player.rank2.rank2-glow:hover,
+.player.rank3.rank3-glow:hover {
+  transform: scale(1.06) translateY(-8px) !important;
+  box-shadow: 0 25px 80px rgba(255,215,0,0.5) !important;
+}
+.rank1{background:linear-gradient(135deg,#b8860b,#ffd700,#ff8c00)}
+.rank2{background:linear-gradient(135deg,#666,#bbb,#eee)}
+.rank3{background:linear-gradient(135deg,#5a2e00,#a0522d,#ffae00)}
+.rank4{background:linear-gradient(135deg,#333,#666,#999)}
+.rank5{background:linear-gradient(135deg,#222,#555,#888)}
+.rank6{background:linear-gradient(135deg,#111,#333,#666)}
+.player-left { display:flex; align-items:center; gap:14px; }
+.rank-number { 
+  font-size: 32px; font-weight: bold; min-width: 36px; transition: all 0.4s ease;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+.rank-number.rank-glow {
+  animation: rankNumPulse 2s ease-in-out infinite alternate;
+  will-change: opacity;
+}
+@keyframes rankNumPulse {
+  0%   { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+.player:hover .rank-number { 
+  transform:scale(1.4) rotate(-8deg); 
+  color:gold; 
+  text-shadow:0 0 25px gold, 0 0 50px gold;
+  animation: rankPulse 0.8s ease-out;
+}
+@keyframes rankPulse {
+  0% { transform: scale(1) rotate(-5deg); }
+  50% { transform: scale(1.5) rotate(-10deg); }
+  100% { transform: scale(1.4) rotate(-8deg); }
+}
+.rank-number.rank1.rank-glow { color: #ffd700; }
+.rank-number.rank2.rank-glow { color: #e0e0e0; }
+.rank-number.rank3.rank-glow { color: #ffae00; }
+.player-avatar { 
+  width:60px; height:60px; border-radius:12px; object-fit:cover; background:#333;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.player:hover .player-avatar {
+  transform: scale(1.15) rotate(8deg);
+  box-shadow: 0 0 30px rgba(255,255,255,0.4);
+}
+.player-name { font-size: 20px; font-weight: bold; }
+.points-badge {
+  font-size: 13px; padding: 4px 10px; border-radius: 8px;
+  background: linear-gradient(45deg, #00c3ff55, #7a5cff55);
+  border: 1px solid #00c3ff88; margin-top: 4px; display:inline-block;
+  transition: all 0.3s ease;
+}
+.player:hover .points-badge {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0,195,255,0.5);
+}
+.player-tiers { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; max-width:45%; }
+.tier {
+  padding: 5px 11px; border-radius: 9px;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);
+  font-size: 13px; font-weight: bold; transition: all 0.3s ease; cursor: default;
+  white-space: nowrap;
+}
+.tier:hover { 
+  transform:scale(1.15) rotate(2deg); 
+  filter:brightness(1.6); 
+  box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+}
+.tier-ht1 { background: linear-gradient(135deg,#1a4a1a,#2d8a2d); border-color:#4caf50aa; }
+.tier-ht2 { background: linear-gradient(135deg,#1a3a1a,#2a6a2a); border-color:#388e3caa; }
+.tier-lt1 { background: linear-gradient(135deg,#1a2a4a,#2a4a8a); border-color:#2196f3aa; }
+.tier-lt2 { background: linear-gradient(135deg,#2a2a4a,#3a3a7a); border-color:#7986cbaa; }
+.tier-lt3 { background: linear-gradient(135deg,#3a2a3a,#5a3a5a); border-color:#9c27b0aa; }
+.tier-none { background: rgba(60,60,60,0.5); border-color:#555; color:#888; }
+.popup-overlay {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.85); display:none;
+  justify-content:center; align-items:center; z-index:1000;
+  backdrop-filter: blur(4px);
+}
+.popup-overlay.open { display:flex; }
+.popup-content {
+  background: linear-gradient(135deg, #0d1033, #1a1a4a);
+  border: 1px solid #7a5cff55;
+  padding: 30px; border-radius: 22px; text-align:center;
+  animation: zoomIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); position:relative;
+  max-width: 520px; width: 90%; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 0 50px rgba(122,92,255,0.5);
+}
+@keyframes zoomIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+.close-btn {
+  position:absolute; right:15px; top:12px; cursor:pointer;
+  font-size:20px; color:#aaa; transition:0.2s;
+}
+.close-btn:hover { color:white; transform:scale(1.3); text-shadow: 0 0 10px white; }
+.popup-avatar { width:90px; border-radius:14px; margin-bottom:12px; }
+.popup-name { font-size:24px; font-weight:bold; margin-bottom:6px; }
+.popup-pts {
+  font-size:14px; color:#00c3ff;
+  background: rgba(0,195,255,0.1); border:1px solid #00c3ff44;
+  padding:4px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;
+}
+.popup-gm-row {
+  display:flex; align-items:center; gap:10px;
+  padding: 10px 12px; border-radius:12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 8px; transition:all 0.3s ease;
+}
+.popup-gm-row:hover { 
+  background:rgba(255,255,255,0.12); 
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(255,255,255,0.1);
+}
+.popup-gm-label { font-size:13px; color:#aaa; min-width:110px; display:flex; align-items:center; gap:6px; }
+.popup-tier-badge {
+  padding:4px 12px; border-radius:8px; font-size:13px; font-weight:bold;
+}
+.no-tier { color:#555; font-size:13px; font-style:italic; }
 
-/* Floating particles */
-.particle {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: #00c3ff;
-  border-radius: 50%;
-  opacity: 0.7;
-  animation: float 10s linear infinite;
+/* ── MOBILE RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  #welcome h1 { font-size: 28px; padding: 0 20px; text-align: center; }
+
+  .header {
+    padding: 12px 14px;
+    border-radius: 0 0 14px 14px;
+    gap: 10px;
+  }
+  .left-header { gap: 8px; width: 100%; }
+  .logo-text { font-size: 17px; }
+  .search-box { flex: 1; }
+  .search-box input { width: 100%; font-size: 14px; padding: 8px 10px; }
+  .nav-btn { font-size: 13px; padding: 7px 11px; }
+
+  .gamemode-bar { padding: 10px 12px 6px; gap: 6px; }
+  .gm-tab { padding: 6px 11px; font-size: 12px; }
+
+  .section-title { margin: 0 12px 6px; font-size: 10px; }
+  .container { padding: 10px 12px; }
+
+  .player {
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    flex-direction: row;
+    align-items: center;
+  }
+  .player-left { gap: 10px; flex: 1; min-width: 0; }
+  .rank-number { font-size: 22px; min-width: 26px; }
+  .player-avatar { width: 46px; height: 46px; border-radius: 9px; }
+  .player-name { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .points-badge { font-size: 11px; padding: 3px 7px; }
+
+  .player-tiers {
+    max-width: 100%;
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+  /* Make player card column on very small screens */
+  .player { flex-wrap: wrap; }
+
+  .tier { font-size: 11px; padding: 4px 8px; border-radius: 7px; }
+
+  .popup-content { padding: 20px 16px; border-radius: 16px; }
+  .popup-avatar { width: 70px; }
+  .popup-name { font-size: 19px; }
+  .popup-gm-label { font-size: 12px; min-width: 90px; }
+  .popup-tier-badge { font-size: 12px; padding: 3px 9px; }
 }
 
-@keyframes float {
-  from {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(-10vh);
-    opacity: 1;
-  }
+@media (max-width: 380px) {
+  #welcome h1 { font-size: 22px; }
+  .logo-text { font-size: 14px; }
+  .gm-tab { font-size: 11px; padding: 5px 9px; }
+  .player-name { font-size: 13px; }
+  .rank-number { font-size: 19px; }
+  .player-avatar { width: 40px; height: 40px; }
 }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-  <h1>Sonic Tiers</h1>
-  <h2>⚙️ Maintenance Mode</h2>
-  <div class="loader"></div>
-  <p>
-    We're upgrading the speed and rankings!  
-    Sonic Tiers is currently under maintenance.  
-    Please check back soon 🚀
-  </p>
+<canvas id="particles-canvas"></canvas>
+
+<div id="welcome"><h1>WELCOME TO SONIC TIERS</h1></div>
+
+<div class="main">
+
+<div class="header">
+  <div class="left-header">
+    <div class="logo-text">⚡ SONIC TIERS</div>
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Search player...">
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <div class="nav-btn">🏠 Home</div>
+    <a href="https://discord.gg/fjCcDeBtZ" style="text-decoration:none;">
+      <div class="nav-btn">🚩 Discord</div>
+    </a>
+  </div>
 </div>
 
-<div class="footer">
-  © 2026 Sonic Tiers
+<div class="gamemode-bar" id="gmBar"></div>
+<div class="section-title" id="gmLabel">Overall Ranking</div>
+<div class="container" id="playerList"></div>
+
 </div>
 
-<!-- Particles -->
+<div class="popup-overlay" id="popup" onclick="closePopup(event)">
+  <div class="popup-content" id="popupContent">
+    <span class="close-btn" onclick="closePopupDirect()">✖</span>
+    <img class="popup-avatar" id="popupSkin" src="" alt="">
+    <div class="popup-name" id="popupName"></div>
+    <div class="popup-pts" id="popupPts"></div>
+    <div id="popupTiers"></div>
+  </div>
+</div>
+
 <script>
-for (let i = 0; i < 30; i++) {
-  let p = document.createElement("div");
-  p.className = "particle";
-  p.style.left = Math.random() * 100 + "vw";
-  p.style.animationDuration = (5 + Math.random() * 5) + "s";
-  p.style.opacity = Math.random();
-  document.body.appendChild(p);
-}
-</script>
+/* ── AMBIENT SOUND SYSTEM ──────────────────────────────────────────────
+   Quiet, spatial tones that feel like the site's cosmic atmosphere.
+   All volumes are kept very low (0.03–0.07 master gain).
+   Uses smooth sine waves with long attack/release to avoid any clicks.
+   ─────────────────────────────────────────────────────────────────── */
+let audioCtx = null;
+let isAudioReady = false;
 
+function initAudio() {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    isAudioReady = true;
+  } catch(e) {}
+}
+
+/* Core: plays a soft ambient chord (root + perfect fifth, both sine) */
+function playAmbient(rootHz, durationSec, volumeScale = 1.0) {
+  if (!isAudioReady || !audioCtx) return;
+  try {
+    const now = audioCtx.currentTime;
+    const master = audioCtx.createGain();
+    master.connect(audioCtx.destination);
+
+    // Very gentle master volume — barely there
+    const peak = 0.045 * volumeScale;
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(peak, now + 0.06);          // soft attack
+    master.gain.setValueAtTime(peak, now + durationSec * 0.5);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + durationSec); // slow fade
+
+    // Root tone
+    const osc1 = audioCtx.createOscillator();
+    osc1.type = 'sine';
+    osc1.frequency.value = rootHz;
+    osc1.connect(master);
+    osc1.start(now);
+    osc1.stop(now + durationSec);
+
+    // Perfect fifth (×1.5) — adds warmth without harshness
+    const osc2 = audioCtx.createOscillator();
+    osc2.type = 'sine';
+    osc2.frequency.value = rootHz * 1.5;
+    const g2 = audioCtx.createGain();
+    g2.gain.value = 0.45; // fifth is quieter than root
+    osc2.connect(g2);
+    g2.connect(master);
+    osc2.start(now);
+    osc2.stop(now + durationSec);
+  } catch(e) {}
+}
+
+/*
+  Musical scale (A minor pentatonic, low octave — cosmic feel):
+  A2=110, C3=130, D3=147, E3=165, G3=196, A3=220
+  These map naturally to interactions without sounding like a toy.
+*/
+
+function playChillHover(frequency, duration, _unused) {
+  // Gentle hover shimmer — short and airy
+  playAmbient(frequency, duration || 0.5, 0.75);
+}
+
+function playRankChime(rank) {
+  // Top-3 ranks get a slightly richer, longer tone
+  const freqs = [220, 196, 165]; // A3, G3, E3
+  playAmbient(freqs[rank] || 196, 0.9, 0.9);
+}
+
+function playSoftClick() {
+  // Click: a soft mid-range pulse, very short
+  playAmbient(147, 0.3, 0.7); // D3
+}
+
+/* PARTICLE SYSTEM (UNCHANGED) */
+class ParticleSystem {
+  constructor() {
+    this.canvas = document.getElementById('particles-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    this.particles = [];
+    this.mouse = { x: 0, y: 0 };
+    this.init();
+  }
+  
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+  
+  init() {
+    for (let i = 0; i < 50; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 3 + 1,
+        brightness: Math.random() * 0.5 + 0.2,
+        hue: Math.random() * 60 + 240
+      });
+    }
+    this.animate();
+  }
+  
+  animate() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // Draw all particles in one pass — NO shadowBlur (it's a full repaint killer)
+    this.particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+      this.ctx.globalAlpha = p.brightness;
+      this.ctx.fillStyle = `hsl(${p.hue}, 70%, 70%)`;
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      this.ctx.fill();
+    });
+    this.ctx.globalAlpha = 1;
+    requestAnimationFrame(() => this.animate());
+  }
+}
+
+/* GAMEMODES & PLAYERS (UNCHANGED) */
+const GAMEMODES = [
+  { id: 'overall',  label: 'Overall',  icon: '🌐' },
+  { id: 'sword',    label: 'Sword',    icon: '⚔️'  },
+  { id: 'axe',      label: 'Axe',      icon: '🪓'  },
+  { id: 'uhc',      label: 'UHC',      icon: '🍎'  },
+  { id: 'nethpot',  label: 'NethPot',  icon: '🧪'  },
+  { id: 'crystal',  label: 'Crystal',  icon: '💎'  },
+  { id: 'mace',     label: 'Mace',     icon: '🔨'  },
+  { id: 'opmace',   label: 'OP Mace',  icon: '☁️'  },
+  { id: 'cart',     label: 'Cart',     icon: '🛒'  },
+];
+
+const PLAYERS = [
+  {
+    name: "IL3ALLOSH", skin: "iL3ALLOSH.png", pts: 330, rankClass: "rank1",
+    tiers: { overall: "HT1", sword: "HT1", axe: "HT1", uhc: "HT1", nethpot: "HT1", crystal: "HT1", mace: null, opmace: "LT1", cart: "LT1" }
+  },
+  {
+    name: "Achrefk", skin: "achrf.png", pts: 52, rankClass: "rank2",
+    tiers: { overall: "LT1", sword: "LT$", axe: "LT3", uhc: "LT5", nethpot: "HT5", crystal: "LT5", mace: "HT2", opmace: "HT3", cart: null, }
+  },
+  {
+    name: "selimdark", skin: "selim.png", pts: 27, rankClass: "rank3",
+    tiers: { overall: "LT4", sword: "HT4", axe: "HT4", uhc: "LT4", nethpot: "HT5", crystal: null, mace: "LT4", opmace: null, cart: null }
+  },
+  {
+    name: "shadow", skin: "shadow.png", pts: 24, rankClass: "rank4",
+    tiers: { overall: "LT3", sword: "HT3", axe: "LT5", uhc: "LT5", nethpot: null, crystal: null, mace: "LT4", opmace: null, cart: null }
+  },
+  {
+    name: "LILBANANA", skin: "lil banan.png", pts: 10, rankClass: "rank5",
+    tiers: { overall: "LT3", sword: null, axe: null, uhc: null, nethpot: null, crystal: null, mace: null, opmace: "LT3", cart: null }
+  },
+  {
+    name: "StopItDuck", skin: "stopitduck.png", pts: 10, rankClass: "rank6",
+    tiers: { overall: "LT5", sword: "LT5", axe: "LT5", uhc: "LT5", nethpot: "LT5", crystal: "LT5", mace: "LT5", opmace: null, cart: null }
+  },
+];
+
+const TIER_CLASS = { HT1:'tier-ht1', HT2:'tier-ht2', LT1:'tier-lt1', LT2:'tier-lt2', LT3:'tier-lt3' };
+const GM_LABELS  = { overall:'Overall Ranking', sword:'Sword Ranking', axe:'Axe Ranking', uhc:'UHC Ranking', nethpot:'NethPot Ranking', crystal:'Crystal Ranking', mace:'Mace Ranking', opmace:'OP Mace Ranking', cart:'Cart Ranking' };
+
+function tc(t){ return TIER_CLASS[t] || 'tier-none'; }
+
+function buildTabs() {
+  const bar = document.getElementById('gmBar');
+  GAMEMODES.forEach((gm, i) => {
+    const el = document.createElement('div');
+    el.className = 'gm-tab' + (i===0?' active':'');
+    el.dataset.gm = gm.id;
+    el.innerHTML = `<span style="font-size:16px">${gm.icon}</span> ${gm.label}`;
+    el.onclick = () => { playSoftClick(); selectGM(el, gm.id); };
+    el.onmouseenter = () => playChillHover(110 + i * 10, 0.5);
+    bar.appendChild(el);
+  });
+}
+
+function getCardTiers(p, gm) {
+  if (gm === 'overall') {
+    return GAMEMODES.filter(g=>g.id!=='overall').map(g => {
+      const t = p.tiers[g.id];
+      return t ? `<div class="tier ${tc(t)}">${g.icon} ${t}</div>` : '';
+    }).join('');
+  }
+  const t = p.tiers[gm];
+  return t ? `<div class="tier ${tc(t)}">${t}</div>` : '<div class="tier tier-none">—</div>';
+}
+
+function renderPlayers(gm) {
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+  PLAYERS.forEach((p, i) => {
+    const div = document.createElement('div');
+    const glowClass = i === 0 ? 'rank1-glow' : i === 1 ? 'rank2-glow' : i === 2 ? 'rank3-glow' : '';
+    div.className = `player ${p.rankClass} ${glowClass}`;
+    
+    div.innerHTML = `
+      <div class="player-left">
+        <span class="rank-number ${i < 3 ? 'rank-glow ' + p.rankClass : ''}">${i+1}.</span>
+        <img class="player-avatar" src="${p.skin}" onerror="this.style.background='#333';this.src=''">
+        <div>
+          <div class="player-name">${p.name}</div>
+          <div class="points-badge">${p.pts} pts</div>
+        </div>
+      </div>
+      <div class="player-tiers">${getCardTiers(p, gm)}</div>`;
+    
+    div.onclick = () => { playSoftClick(); showPopup(p.name); };
+    div.onmouseenter = () => {
+      // Each player card gets a unique note from A minor pentatonic
+      const scale = [110, 130, 147, 165, 196, 220];
+      playChillHover(scale[i % scale.length], 0.6);
+      if (i < 3) playRankChime(i);
+    };
+    list.appendChild(div);
+    
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      div.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      div.style.opacity = '1'; div.style.transform = 'translateY(0) scale(1)';
+    }));
+  });
+}
+
+let currentGM = 'overall';
+
+function selectGM(el, gm) {
+  document.querySelectorAll('.gm-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentGM = gm;
+  document.getElementById('gmLabel').textContent = GM_LABELS[gm] || gm + ' Ranking';
+  renderPlayers(gm);
+}
+
+function showPopup(name) {
+  playAmbient(130, 0.7, 0.8); // C3 — calm open
+  const p = PLAYERS.find(x=>x.name===name);
+  document.getElementById('popupName').textContent = name;
+  document.getElementById('popupPts').textContent = p.pts + ' pts';
+  document.getElementById('popupSkin').src = p.skin;
+  let html = '';
+  GAMEMODES.filter(g=>g.id!=='overall').forEach(g => {
+    const t = p.tiers[g.id];
+    const badge = t
+      ? `<span class="popup-tier-badge ${tc(t)}">${t}</span>`
+      : `<span class="no-tier">—</span>`;
+    html += `<div class="popup-gm-row" onmouseenter="playChillHover(110, 0.4)">
+      <div class="popup-gm-label"><span style="font-size:16px">${g.icon}</span>${g.label}</div>
+      ${badge}
+    </div>`;
+  });
+  document.getElementById('popupTiers').innerHTML = html;
+  document.getElementById('popup').classList.add('open');
+}
+
+function closePopup(e) { if(e.target===document.getElementById('popup')) closePopupDirect(); }
+function closePopupDirect() { 
+  playAmbient(110, 0.35, 0.6); // A2 — quiet close
+  document.getElementById('popup').classList.remove('open'); 
+}
+
+// Event Listeners
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+  if(e.key==='Enter') {
+    playSoftClick();
+    const val = this.value.trim().toLowerCase();
+    const found = PLAYERS.find(p=>p.name.toLowerCase()===val);
+    if(found) showPopup(found.name);
+    else alert('Player not found');
+  }
+});
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.onmouseenter = () => playChillHover(165, 0.4);
+});
+
+// Init
+let particles = new ParticleSystem();
+window.addEventListener('resize', () => particles.resize());
+document.addEventListener('mousemove', (e) => {
+  particles.mouse.x = e.clientX;
+  particles.mouse.y = e.clientY;
+});
+document.addEventListener('click', () => {
+  if (!isAudioReady && audioCtx) {
+    audioCtx.resume();
+    isAudioReady = true;
+  }
+}, { once: true });
+initAudio();
+buildTabs();
+renderPlayers('overall');
+</script>
 </body>
 </html>
