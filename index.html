@@ -40,7 +40,7 @@ body {
   100%{opacity:1; transform: translateY(0);}
 }
 
-/* GLOWING TOP 3 RANKS — GPU-friendly: only opacity animates, no box-shadow repaints */
+/* GLOWING TOP 3 RANKS */
 .rank1-glow {
   background: linear-gradient(135deg, #b8860b, #ffd700, #ff8c00) !important;
   box-shadow: 0 0 40px rgba(255, 215, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255,255,255,0.2);
@@ -287,12 +287,26 @@ body {
   filter:brightness(1.6); 
   box-shadow: 0 5px 15px rgba(255,255,255,0.3);
 }
+
+/* ── TIER COLORS ─────────────────────────────────────────────────────
+   HT1  = bright green      (best)
+   HT2  = mid green
+   LT1  = royal blue
+   LT2  = indigo/slate
+   LT3  = purple
+   LT4  = deep red/crimson  (new)
+   LT5  = dark orange/rust  (new)
+   none = gray              (unranked)
+   ──────────────────────────────────────────────────────────────────── */
 .tier-ht1 { background: linear-gradient(135deg,#1a4a1a,#2d8a2d); border-color:#4caf50aa; }
 .tier-ht2 { background: linear-gradient(135deg,#1a3a1a,#2a6a2a); border-color:#388e3caa; }
 .tier-lt1 { background: linear-gradient(135deg,#1a2a4a,#2a4a8a); border-color:#2196f3aa; }
 .tier-lt2 { background: linear-gradient(135deg,#2a2a4a,#3a3a7a); border-color:#7986cbaa; }
 .tier-lt3 { background: linear-gradient(135deg,#3a2a3a,#5a3a5a); border-color:#9c27b0aa; }
+.tier-lt4 { background: linear-gradient(135deg,#4a1a1a,#8a2020); border-color:#e53935aa; color:#ffaaaa; }
+.tier-lt5 { background: linear-gradient(135deg,#3a2010,#7a4010); border-color:#f57c00aa; color:#ffd0a0; }
 .tier-none { background: rgba(60,60,60,0.5); border-color:#555; color:#888; }
+
 .popup-overlay {
   position: fixed; top:0; left:0; width:100%; height:100%;
   background: rgba(0,0,0,0.85); display:none;
@@ -379,7 +393,6 @@ body {
     justify-content: flex-start;
     margin-top: 8px;
   }
-  /* Make player card column on very small screens */
   .player { flex-wrap: wrap; }
 
   .tier { font-size: 11px; padding: 4px 8px; border-radius: 7px; }
@@ -441,11 +454,7 @@ body {
 </div>
 
 <script>
-/* ── AMBIENT SOUND SYSTEM ──────────────────────────────────────────────
-   Quiet, spatial tones that feel like the site's cosmic atmosphere.
-   All volumes are kept very low (0.03–0.07 master gain).
-   Uses smooth sine waves with long attack/release to avoid any clicks.
-   ─────────────────────────────────────────────────────────────────── */
+/* ── AMBIENT SOUND SYSTEM ─────────────────────────────────────────── */
 let audioCtx = null;
 let isAudioReady = false;
 
@@ -456,35 +465,28 @@ function initAudio() {
   } catch(e) {}
 }
 
-/* Core: plays a soft ambient chord (root + perfect fifth, both sine) */
 function playAmbient(rootHz, durationSec, volumeScale = 1.0) {
   if (!isAudioReady || !audioCtx) return;
   try {
     const now = audioCtx.currentTime;
     const master = audioCtx.createGain();
     master.connect(audioCtx.destination);
-
-    // Very gentle master volume — barely there
     const peak = 0.045 * volumeScale;
     master.gain.setValueAtTime(0, now);
-    master.gain.linearRampToValueAtTime(peak, now + 0.06);          // soft attack
+    master.gain.linearRampToValueAtTime(peak, now + 0.06);
     master.gain.setValueAtTime(peak, now + durationSec * 0.5);
-    master.gain.exponentialRampToValueAtTime(0.0001, now + durationSec); // slow fade
-
-    // Root tone
+    master.gain.exponentialRampToValueAtTime(0.0001, now + durationSec);
     const osc1 = audioCtx.createOscillator();
     osc1.type = 'sine';
     osc1.frequency.value = rootHz;
     osc1.connect(master);
     osc1.start(now);
     osc1.stop(now + durationSec);
-
-    // Perfect fifth (×1.5) — adds warmth without harshness
     const osc2 = audioCtx.createOscillator();
     osc2.type = 'sine';
     osc2.frequency.value = rootHz * 1.5;
     const g2 = audioCtx.createGain();
-    g2.gain.value = 0.45; // fifth is quieter than root
+    g2.gain.value = 0.45;
     osc2.connect(g2);
     g2.connect(master);
     osc2.start(now);
@@ -492,29 +494,20 @@ function playAmbient(rootHz, durationSec, volumeScale = 1.0) {
   } catch(e) {}
 }
 
-/*
-  Musical scale (A minor pentatonic, low octave — cosmic feel):
-  A2=110, C3=130, D3=147, E3=165, G3=196, A3=220
-  These map naturally to interactions without sounding like a toy.
-*/
-
 function playChillHover(frequency, duration, _unused) {
-  // Gentle hover shimmer — short and airy
   playAmbient(frequency, duration || 0.5, 0.75);
 }
 
 function playRankChime(rank) {
-  // Top-3 ranks get a slightly richer, longer tone
-  const freqs = [220, 196, 165]; // A3, G3, E3
+  const freqs = [220, 196, 165];
   playAmbient(freqs[rank] || 196, 0.9, 0.9);
 }
 
 function playSoftClick() {
-  // Click: a soft mid-range pulse, very short
-  playAmbient(147, 0.3, 0.7); // D3
+  playAmbient(147, 0.3, 0.7);
 }
 
-/* PARTICLE SYSTEM (UNCHANGED) */
+/* PARTICLE SYSTEM */
 class ParticleSystem {
   constructor() {
     this.canvas = document.getElementById('particles-canvas');
@@ -524,12 +517,10 @@ class ParticleSystem {
     this.mouse = { x: 0, y: 0 };
     this.init();
   }
-  
   resize() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
   }
-  
   init() {
     for (let i = 0; i < 50; i++) {
       this.particles.push({
@@ -544,10 +535,8 @@ class ParticleSystem {
     }
     this.animate();
   }
-  
   animate() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    // Draw all particles in one pass — NO shadowBlur (it's a full repaint killer)
     this.particles.forEach(p => {
       p.x += p.vx;
       p.y += p.vy;
@@ -564,7 +553,7 @@ class ParticleSystem {
   }
 }
 
-/* GAMEMODES & PLAYERS (UNCHANGED) */
+/* GAMEMODES & PLAYERS */
 const GAMEMODES = [
   { id: 'overall',  label: 'Overall',  icon: '🌐' },
   { id: 'sword',    label: 'Sword',    icon: '⚔️'  },
@@ -584,7 +573,7 @@ const PLAYERS = [
   },
   {
     name: "Achrefk", skin: "achrf.png", pts: 52, rankClass: "rank2",
-    tiers: { overall: "LT1", sword: "LT$", axe: "LT3", uhc: "LT5", nethpot: "HT5", crystal: "LT5", mace: "HT2", opmace: "HT3", cart: null, }
+    tiers: { overall: "LT1", sword: "LT4", axe: "LT3", uhc: "LT5", nethpot: "HT5", crystal: "LT5", mace: "HT2", opmace: "HT3", cart: null }
   },
   {
     name: "Vonexiumc", skin: "face.png", pts: 50, rankClass: "rank3",
@@ -594,7 +583,6 @@ const PLAYERS = [
     name: "selimdark", skin: "nga.png", pts: 30, rankClass: "rank4",
     tiers: { overall: "LT4", sword: "LT3", axe: "HT4", uhc: "LT4", nethpot: "HT5", crystal: null, mace: "LT4", opmace: null, cart: null }
   },
-
   {
     name: "shadow", skin: "shadow.png", pts: 24, rankClass: "rank4",
     tiers: { overall: "LT3", sword: "HT3", axe: "LT5", uhc: "LT5", nethpot: null, crystal: null, mace: "LT4", opmace: null, cart: null }
@@ -607,17 +595,37 @@ const PLAYERS = [
     name: "Kosontini", skin: "kson.png", pts: 15, rankClass: "rank6",
     tiers: { overall: "LT3", sword: "LT3", axe: "HT5", uhc: null, nethpot: null, crystal: "LT5", mace: null, opmace: null, cart: null }
   },
-
   {
     name: "LILBANANA", skin: "lil banan.png", pts: 10, rankClass: "rank6",
     tiers: { overall: "LT3", sword: null, axe: null, uhc: null, nethpot: null, crystal: null, mace: null, opmace: "LT3", cart: null }
   },
 ];
 
-const TIER_CLASS = { HT1:'tier-ht1', HT2:'tier-ht2', LT1:'tier-lt1', LT2:'tier-lt2', LT3:'tier-lt3' };
-const GM_LABELS  = { overall:'Overall Ranking', sword:'Sword Ranking', axe:'Axe Ranking', uhc:'UHC Ranking', nethpot:'NethPot Ranking', crystal:'Crystal Ranking', mace:'Mace Ranking', opmace:'OP Mace Ranking', cart:'Cart Ranking' };
+/* ── TIER CLASS MAP — now covers HT1–HT5 and LT1–LT5 ─────────────── */
+const TIER_CLASS = {
+  HT1: 'tier-ht1',
+  HT2: 'tier-ht2',
+  HT3: 'tier-ht2',  // reuse HT2 green shade for HT3
+  HT4: 'tier-ht2',  // same
+  HT5: 'tier-ht2',  // same
+  LT1: 'tier-lt1',
+  LT2: 'tier-lt2',
+  LT3: 'tier-lt3',
+  LT4: 'tier-lt4',  // crimson red
+  LT5: 'tier-lt5',  // burnt orange
+};
 
-function tc(t){ return TIER_CLASS[t] || 'tier-none'; }
+const GM_LABELS = {
+  overall:'Overall Ranking', sword:'Sword Ranking', axe:'Axe Ranking',
+  uhc:'UHC Ranking', nethpot:'NethPot Ranking', crystal:'Crystal Ranking',
+  mace:'Mace Ranking', opmace:'OP Mace Ranking', cart:'Cart Ranking'
+};
+
+function tc(t) {
+  if (!t) return 'tier-none';
+  const key = t.trim().toUpperCase();
+  return TIER_CLASS[key] || 'tier-none';
+}
 
 function buildTabs() {
   const bar = document.getElementById('gmBar');
@@ -636,11 +644,11 @@ function getCardTiers(p, gm) {
   if (gm === 'overall') {
     return GAMEMODES.filter(g=>g.id!=='overall').map(g => {
       const t = p.tiers[g.id];
-      return t ? `<div class="tier ${tc(t)}">${g.icon} ${t}</div>` : '';
+      return t ? `<div class="tier ${tc(t)}">${g.icon} ${t.trim()}</div>` : '';
     }).join('');
   }
   const t = p.tiers[gm];
-  return t ? `<div class="tier ${tc(t)}">${t}</div>` : '<div class="tier tier-none">—</div>';
+  return t ? `<div class="tier ${tc(t)}">${t.trim()}</div>` : '<div class="tier tier-none">—</div>';
 }
 
 function renderPlayers(gm) {
@@ -650,7 +658,6 @@ function renderPlayers(gm) {
     const div = document.createElement('div');
     const glowClass = i === 0 ? 'rank1-glow' : i === 1 ? 'rank2-glow' : i === 2 ? 'rank3-glow' : '';
     div.className = `player ${p.rankClass} ${glowClass}`;
-    
     div.innerHTML = `
       <div class="player-left">
         <span class="rank-number ${i < 3 ? 'rank-glow ' + p.rankClass : ''}">${i+1}.</span>
@@ -661,16 +668,13 @@ function renderPlayers(gm) {
         </div>
       </div>
       <div class="player-tiers">${getCardTiers(p, gm)}</div>`;
-    
     div.onclick = () => { playSoftClick(); showPopup(p.name); };
     div.onmouseenter = () => {
-      // Each player card gets a unique note from A minor pentatonic
       const scale = [110, 130, 147, 165, 196, 220];
       playChillHover(scale[i % scale.length], 0.6);
       if (i < 3) playRankChime(i);
     };
     list.appendChild(div);
-    
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       div.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
       div.style.opacity = '1'; div.style.transform = 'translateY(0) scale(1)';
@@ -689,7 +693,7 @@ function selectGM(el, gm) {
 }
 
 function showPopup(name) {
-  playAmbient(130, 0.7, 0.8); // C3 — calm open
+  playAmbient(130, 0.7, 0.8);
   const p = PLAYERS.find(x=>x.name===name);
   document.getElementById('popupName').textContent = name;
   document.getElementById('popupPts').textContent = p.pts + ' pts';
@@ -698,7 +702,7 @@ function showPopup(name) {
   GAMEMODES.filter(g=>g.id!=='overall').forEach(g => {
     const t = p.tiers[g.id];
     const badge = t
-      ? `<span class="popup-tier-badge ${tc(t)}">${t}</span>`
+      ? `<span class="popup-tier-badge ${tc(t)}">${t.trim()}</span>`
       : `<span class="no-tier">—</span>`;
     html += `<div class="popup-gm-row" onmouseenter="playChillHover(110, 0.4)">
       <div class="popup-gm-label"><span style="font-size:16px">${g.icon}</span>${g.label}</div>
@@ -711,11 +715,10 @@ function showPopup(name) {
 
 function closePopup(e) { if(e.target===document.getElementById('popup')) closePopupDirect(); }
 function closePopupDirect() { 
-  playAmbient(110, 0.35, 0.6); // A2 — quiet close
+  playAmbient(110, 0.35, 0.6);
   document.getElementById('popup').classList.remove('open'); 
 }
 
-// Event Listeners
 document.getElementById('searchInput').addEventListener('keypress', function(e) {
   if(e.key==='Enter') {
     playSoftClick();
@@ -730,7 +733,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.onmouseenter = () => playChillHover(165, 0.4);
 });
 
-// Init
 let particles = new ParticleSystem();
 window.addEventListener('resize', () => particles.resize());
 document.addEventListener('mousemove', (e) => {
